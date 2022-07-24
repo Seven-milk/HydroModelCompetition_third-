@@ -185,6 +185,7 @@ def verify_flood(df):
 
 
 if __name__ == "__main__":
+    save = False
     home = "F:/research/The third numerical Simulation of water Science/Intermediary_heat/data"
     df_list = readdata(home)
     sample_df, verify_df = create_sample_verify_dataset(df_list)
@@ -198,7 +199,10 @@ if __name__ == "__main__":
     I = np.eye(lags + 1)
     for i in range(len(df_list)):
         df_ = df_list[i]
-        save_on = os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat', 'kalman_corrected_ret', str(i))
+        if save:
+            save_on = os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat', 'kalman_corrected_ret', str(i))
+        else:
+            save_on = False
         Kalman_correction(df_, F, H, I, Q, lags, plot=False, save_on=f"{save_on}")
 
     # verify
@@ -206,8 +210,9 @@ if __name__ == "__main__":
     df_4 = Kalman_correction(df_list[4], F, H, I, Q, lags, plot=False)
     verify_df_out0 = verify_flood(df_0)
     verify_df_out4 = verify_flood(df_4)
-    verify_df_out0.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
+    if save:
+        verify_df_out0.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
                                        'kalman_corrected_ret', "verify_0.csv"))
-    verify_df_out4.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
+        verify_df_out4.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
                                        'kalman_corrected_ret', "verify_4.csv"))
 
