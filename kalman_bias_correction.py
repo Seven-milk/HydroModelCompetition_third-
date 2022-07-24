@@ -172,9 +172,9 @@ def verify_flood(df):
     flood_volume_diff_relative_before = (df.runoff_p.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
     flood_volume_diff_relative_after = (df.runoff_p_corrected.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
 
-    NSE_before = (sum((df.runoff_p - df.runoff_o.mean()) ** 2) - sum((df.runoff_p - df.runoff_o) ** 2)) / sum(
+    NSE_before = (sum((df.runoff_o - df.runoff_o.mean()) ** 2) - sum((df.runoff_p - df.runoff_o) ** 2)) / sum(
         (df.runoff_o - df.runoff_o.mean()) ** 2)
-    NSE_after = (sum((df.runoff_p_corrected - df.runoff_o.mean()) ** 2) - sum((df.runoff_p_corrected - df.runoff_o) ** 2)) / sum(
+    NSE_after = (sum((df.runoff_o - df.runoff_o.mean()) ** 2) - sum((df.runoff_p_corrected - df.runoff_o) ** 2)) / sum(
         (df.runoff_o - df.runoff_o.mean()) ** 2)
 
     peak_time_diff_before = np.argmax(df.runoff_p.values) - np.argmax(df.runoff_o.values)
@@ -218,7 +218,7 @@ if __name__ == "__main__":
             save_on = os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat', 'kalman_corrected_ret', str(i))
         else:
             save_on = False
-        Kalman_correction(df_, F, H, I, Q, R, lags, plot=False, save_on=f"{save_on}")
+        Kalman_correction(df_, F, H, I, Q, R, lags, plot=False, save_on=save_on)
 
     # verify
     df_0 = Kalman_correction(df_list[0], F, H, I, Q, R, lags, plot=False)
