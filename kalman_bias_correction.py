@@ -177,13 +177,21 @@ def verify_flood(df):
     NSE_after = (sum((df.runoff_p_corrected - df.runoff_o.mean()) ** 2) - sum((df.runoff_p_corrected - df.runoff_o) ** 2)) / sum(
         (df.runoff_o - df.runoff_o.mean()) ** 2)
 
-    peak_diff_before = np.argmax(df.runoff_p.values) - np.argmax(df.runoff_o.values)
-    peak_diff_after = np.argmax(df.runoff_p_corrected.values) - np.argmax(df.runoff_o.values)
+    peak_time_diff_before = np.argmax(df.runoff_p.values) - np.argmax(df.runoff_o.values)
+    peak_time_diff_after = np.argmax(df.runoff_p_corrected.values) - np.argmax(df.runoff_o.values)
+
+    peak_diff_abs_before = df.runoff_p.values.max() - df.runoff_o.values.max()
+    peak_diff_abs_after = df.runoff_p_corrected.values.max() - df.runoff_o.values.max()
+    peak_diff_relative_before = (df.runoff_p.values.max() - df.runoff_o.values.max()) / df.runoff_o.values.max()
+    peak_diff_relative_after = (df.runoff_p_corrected.values.max() - df.runoff_o.values.max()) / df.runoff_o.values.max()
 
     df_out = pd.DataFrame({"flood_volume_diff_abs": [flood_volume_diff_abs_before, flood_volume_diff_abs_after],
                            "flood_volume_diff_relative": [flood_volume_diff_relative_before, flood_volume_diff_relative_after],
+                           "peak_diff_abs": [peak_diff_abs_before, peak_diff_abs_after],
+                           "peak_diff_relative": [peak_diff_relative_before, peak_diff_relative_after],
                            "NSE": [NSE_before, NSE_after],
-                           "peak_diff": [peak_diff_before, peak_diff_after]}, index=["before", "after"])
+                           "peak_time_diff": [peak_time_diff_before, peak_time_diff_after]},
+                          index=["before", "after"])
     return df_out
 
 
