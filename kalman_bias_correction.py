@@ -106,7 +106,7 @@ def ARmodel(df, lags=2):
 
 
 # correction function
-def Kalman_correction(df, F, H, I, Q, lags, plot=True, save_on=False):
+def Kalman_correction(df, F, H, I, Q, R, lags, plot=True, save_on=False):
     # state runoff_o
     # observe runoff_p
     # optional input pt_1(pre)
@@ -116,7 +116,6 @@ def Kalman_correction(df, F, H, I, Q, lags, plot=True, save_on=False):
     runoff_o = df.runoff_o.values
     runoff_p = df.runoff_p.values
     bias = df.bias.values
-    R = np.var(bias)
 
     # init, t = 0
     Pt_0 = np.eye(lags + 1)
@@ -177,21 +176,29 @@ def verify_flood(df):
         (df.runoff_o - df.runoff_o.mean()) ** 2)
     NSE_after = (sum((df.runoff_p_corrected - df.runoff_o.mean()) ** 2) - sum((df.runoff_p_corrected - df.runoff_o) ** 2)) / sum(
         (df.runoff_o - df.runoff_o.mean()) ** 2)
-    df_out = pd.DataFrame([{"flood_volume_diff_abs_before": flood_volume_diff_abs_before, "flood_volume_diff_abs_after": flood_volume_diff_abs_after,
-                           "flood_volume_diff_relative_before": flood_volume_diff_relative_before, "flood_volume_diff_relative_after": flood_volume_diff_relative_after,
-                           "NSE_before": NSE_before, "NSE_after": NSE_after}])
 
+    peak_diff_before = np.argmax(df.runoff_p.values) - np.argmax(df.runoff_o.values)
+    peak_diff_after = np.argmax(df.runoff_p_corrected.values) - np.argmax(df.runoff_o.values)
+
+    df_out = pd.DataFrame({"flood_volume_diff_abs": [flood_volume_diff_abs_before, flood_volume_diff_abs_after],
+                           "flood_volume_diff_relative": [flood_volume_diff_relative_before, flood_volume_diff_relative_after],
+                           "NSE": [NSE_before, NSE_after],
+                           "peak_diff": [peak_diff_before, peak_diff_after]}, index=["before", "after"])
     return df_out
 
 
 if __name__ == "__main__":
-    save = False
+    save = True
     home = "F:/research/The third numerical Simulation of water Science/Intermediary_heat/data"
     df_list = readdata(home)
     sample_df, verify_df = create_sample_verify_dataset(df_list)
     lags = 2
     mod, res, Q = ARmodel(sample_df, lags=lags)
     Q = Q * np.eye(lags + 1)
+    print("Q\t", Q)
+    R = np.var(sample_df.bias.values)
+    print("R\t", R)
+
     F = np.array([[res.params[1], res.params[2], res.params[0]],
                   [1, 0, 0],
                   [0, 0, 1]])  # lags=2
@@ -203,11 +210,11 @@ if __name__ == "__main__":
             save_on = os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat', 'kalman_corrected_ret', str(i))
         else:
             save_on = False
-        Kalman_correction(df_, F, H, I, Q, lags, plot=False, save_on=f"{save_on}")
+        Kalman_correction(df_, F, H, I, Q, R, lags, plot=False, save_on=f"{save_on}")
 
     # verify
-    df_0 = Kalman_correction(df_list[0], F, H, I, Q, lags, plot=False)
-    df_4 = Kalman_correction(df_list[4], F, H, I, Q, lags, plot=False)
+    df_0 = Kalman_correction(df_list[0], F, H, I, Q, R, lags, plot=False)
+    df_4 = Kalman_correction(df_list[4], F, H, I, Q, R, lags, plot=False)
     verify_df_out0 = verify_flood(df_0)
     verify_df_out4 = verify_flood(df_4)
     if save:
