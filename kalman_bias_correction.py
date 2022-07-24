@@ -167,6 +167,23 @@ def Kalman_correction(df, F, H, I, Q, lags, plot=True, save_on=False):
     return df
 
 
+def verify_flood(df):
+    flood_volume_diff_abs_before = df.runoff_p.sum() - df.runoff_o.sum()
+    flood_volume_diff_abs_after = df.runoff_p_corrected.sum() - df.runoff_o.sum()
+    flood_volume_diff_relative_before = (df.runoff_p.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
+    flood_volume_diff_relative_after = (df.runoff_p_corrected.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
+
+    NSE_before = (sum((df.runoff_p - df.runoff_o.mean()) ** 2) - sum((df.runoff_p - df.runoff_o) ** 2)) / sum(
+        (df.runoff_o - df.runoff_o.mean()) ** 2)
+    NSE_after = (sum((df.runoff_p_corrected - df.runoff_o.mean()) ** 2) - sum((df.runoff_p_corrected - df.runoff_o) ** 2)) / sum(
+        (df.runoff_o - df.runoff_o.mean()) ** 2)
+    df_out = pd.DataFrame([{"flood_volume_diff_abs_before": flood_volume_diff_abs_before, "flood_volume_diff_abs_after": flood_volume_diff_abs_after,
+                           "flood_volume_diff_relative_before": flood_volume_diff_relative_before, "flood_volume_diff_relative_after": flood_volume_diff_relative_after,
+                           "NSE_before": NSE_before, "NSE_after": NSE_after}])
+
+    return df_out
+
+
 if __name__ == "__main__":
     home = "F:/research/The third numerical Simulation of water Science/Intermediary_heat/data"
     df_list = readdata(home)
@@ -183,3 +200,14 @@ if __name__ == "__main__":
         df_ = df_list[i]
         save_on = os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat', 'kalman_corrected_ret', str(i))
         Kalman_correction(df_, F, H, I, Q, lags, plot=False, save_on=f"{save_on}")
+
+    # verify
+    df_0 = Kalman_correction(df_list[0], F, H, I, Q, lags, plot=False)
+    df_4 = Kalman_correction(df_list[4], F, H, I, Q, lags, plot=False)
+    verify_df_out0 = verify_flood(df_0)
+    verify_df_out4 = verify_flood(df_4)
+    verify_df_out0.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
+                                       'kalman_corrected_ret', "verify_0.csv"))
+    verify_df_out4.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
+                                       'kalman_corrected_ret', "verify_4.csv"))
+
