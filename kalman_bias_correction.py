@@ -167,8 +167,8 @@ def Kalman_correction(df, F, H, I, Q, R, lags, plot=True, save_on=False):
 
 
 def verify_flood(df):
-    flood_volume_diff_abs_before = df.runoff_p.sum() - df.runoff_o.sum()
-    flood_volume_diff_abs_after = df.runoff_p_corrected.sum() - df.runoff_o.sum()
+    flood_volume_diff_abs_before = (df.runoff_p.sum() - df.runoff_o.sum()) * 3600
+    flood_volume_diff_abs_after = (df.runoff_p_corrected.sum() - df.runoff_o.sum()) * 3600
     flood_volume_diff_relative_before = (df.runoff_p.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
     flood_volume_diff_relative_after = (df.runoff_p_corrected.sum() - df.runoff_o.sum()) / df.runoff_o.sum()
 
@@ -196,7 +196,7 @@ def verify_flood(df):
 
 
 if __name__ == "__main__":
-    save = True
+    save = False
     home = "F:/research/The third numerical Simulation of water Science/Intermediary_heat/data"
     df_list = readdata(home)
     sample_df, verify_df = create_sample_verify_dataset(df_list)
@@ -231,3 +231,12 @@ if __name__ == "__main__":
         verify_df_out4.to_csv(os.path.join('F:/research/The third numerical Simulation of water Science/Intermediary_heat',
                                        'kalman_corrected_ret', "verify_4.csv"))
 
+    df_0 = pd.read_excel("F:/research/The third numerical Simulation of water Science/Intermediary_heat/bp_corrected/0.xlsx")
+    df_4 = pd.read_excel("F:/research/The third numerical Simulation of water Science/Intermediary_heat/bp_corrected/4.xlsx")
+    verify_df_out0 = verify_flood(df_0)
+    verify_df_out4 = verify_flood(df_4)
+
+    df_0 = pd.read_excel("F:/research/The third numerical Simulation of water Science/Intermediary_heat/ar_corrected/0.xlsx")
+    df_4 = pd.read_excel("F:/research/The third numerical Simulation of water Science/Intermediary_heat/ar_corrected/4.xlsx")
+    verify_df_out0 = verify_flood(df_0)
+    verify_df_out4 = verify_flood(df_4)
